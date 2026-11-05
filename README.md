@@ -63,3 +63,18 @@ The project uses Vite 8 and its matching React plugin. TypeScript is pinned to t
 History uses the original `ezd-status-history-v1` localStorage key and format, retaining the last 100 runs and the latest successful status per case. Browser storage belongs to an origin: a different hostname or port will have separate history. JSON export downloads a backup; importing history is not implemented.
 
 The application calls `https://app.malopolska.uw.gov.pl/ws/ezd/checkstatus` through the service's JSONP callback interface, as the source page did. No backend or API key is required. Live results require access to that external service. Checks run manually; there is no polling. The case prefix and year remain `WO-I.6121.` and `2026`, matching the source.
+
+## GitHub Pages
+
+`.github/workflows/node.js.yml` checks and builds on Node.js 24, uploads `dist` as a Pages artifact from the build job, then deploys that artifact in a dependent job. The deploy job has `pages: write` and `id-token: write` permissions. Official actions are pinned to commit SHAs.
+
+In repository Settings → Pages, select **GitHub Actions** as the publishing source. Push to `main` or run **Build and deploy to Pages** manually. The workflow obtains the site's base path from `actions/configure-pages` and passes it through `VITE_BASE_PATH`; local development defaults to `/`.
+
+To verify a project-site build locally:
+
+```sh
+VITE_BASE_PATH=/ezd-status/ npm run build
+npm run preview
+```
+
+Open `/ezd-status/` on the preview server. Asset URLs in `dist/index.html` should start with `/ezd-status/assets/`.
