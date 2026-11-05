@@ -5,7 +5,7 @@ import type {
   KnownStatus,
   StatusChange,
 } from "../types/index.ts";
-import { validData } from "./cases.ts";
+import { parseReference, validData } from "./cases.ts";
 import { emptyLog } from "./history.ts";
 
 export const LOG_KEY = "ezd-status-history-v1";
@@ -80,6 +80,8 @@ export function loadLog(storage: HistoryStorage): StoredHistory {
       ) {
         throw new Error("Invalid history record");
       }
+
+      parseReference(run.main);
 
       return {
         id:

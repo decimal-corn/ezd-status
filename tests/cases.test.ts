@@ -3,9 +3,11 @@ import test from "node:test";
 
 import {
   bounds,
+  caseAt,
   inProgress,
   numbersFor,
   parseCase,
+  urlFor,
   validData,
 } from "../src/lib/cases.ts";
 import { changesFor, newlyCompleted } from "../src/lib/comparison.ts";
@@ -81,4 +83,17 @@ test("rejects malformed service responses", () => {
   }
 
   assert.ok(validData({ Response: null, StatusCode: 404 }));
+});
+
+test("uses the selected year and case type for the full reference and nearby numbers", () => {
+  const selected = parseCase("100", { year: "2027", caseType: "6122" });
+
+  assert.equal(selected.full, "WO-I.6122.100.2027");
+  assert.equal(caseAt(101, selected), "WO-I.6122.101.2027");
+  assert.equal(
+    new URL(urlFor(selected.full)).searchParams.get("numer"),
+    selected.full,
+  );
+  assert.throws(() => parseCase("100", { year: "2028", caseType: "6122" }));
+  assert.throws(() => parseCase("100", { year: "2027", caseType: "9999" }));
 });

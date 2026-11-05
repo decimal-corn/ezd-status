@@ -1,11 +1,13 @@
 import type { SubmitEvent } from "react";
 
+import { CASE_DEPARTMENT } from "../constants/cases.ts";
 import { caseAt } from "../lib/cases.ts";
 import type {
   CaseRange,
   CheckSettings as Settings,
   FinishedCheck,
 } from "../types/index.ts";
+import CaseSelectors from "./CaseSelectors.tsx";
 
 interface Props {
   settings: Settings;
@@ -46,10 +48,15 @@ export default function CheckSettings({
     stateLabel = errorCount ? "Done · some requests failed" : "Done";
   }
 
+  const reference = {
+    department: CASE_DEPARTMENT,
+    year: settings.year,
+    caseType: settings.caseType,
+  };
   let rangeLabel = "";
 
   if (range) {
-    rangeLabel = `${caseAt(range.start)} — ${caseAt(range.end)} · 100 cases`;
+    rangeLabel = `${caseAt(range.start, reference)} — ${caseAt(range.end, reference)} · 100 cases`;
 
     if (running) {
       rangeLabel += ` · shift ${shift > 0 ? "+" : ""}${shift}`;
@@ -62,6 +69,11 @@ export default function CheckSettings({
     <section className="panel settings" aria-label="Check settings">
       <form onSubmit={onStart} noValidate>
         <div className="fields">
+          <CaseSelectors
+            settings={settings}
+            disabled={running}
+            onChange={onChange}
+          />
           <div className="casefield">
             <label htmlFor="caseNumber">Case number</label>
             <input
@@ -80,7 +92,8 @@ export default function CheckSettings({
               onChange={(e) => onChange("caseNumber", e.target.value)}
             />
             <small id="caseHint">
-              WO-I.6121.<b>number</b>.2026
+              {CASE_DEPARTMENT}.{settings.caseType}.<b>number</b>.
+              {settings.year}
             </small>
           </div>
           <div>

@@ -42,7 +42,7 @@ export async function checkCases(
   const worker = async () => {
     while (!run.controller.signal.aborted && cursor < numbers.length) {
       const number = numbers[cursor++];
-      const full = caseAt(number);
+      const full = caseAt(number, run.case);
 
       try {
         const data = await request(full, run.controller.signal, timeout);

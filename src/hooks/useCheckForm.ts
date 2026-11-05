@@ -1,27 +1,29 @@
 import { useState } from "react";
 
+import { DEFAULT_CASE_SELECTION } from "../constants/cases.ts";
 import { bounds, parseCase } from "../lib/cases.ts";
 import { errorMessage } from "../lib/errors.ts";
 import type {
   ActiveCheck,
   Baseline,
-  CaseInfo,
+  CaseReference,
   CheckSettings,
 } from "../types/index.ts";
 
 export function useCheckForm() {
   const [settings, setSettings] = useState<CheckSettings>({
+    ...DEFAULT_CASE_SELECTION,
     caseNumber: "",
     parallel: "3",
     timeout: "20",
     randomize: false,
   });
   const [validation, setValidation] = useState("");
-  let selected: CaseInfo | null = null;
+  let selected: CaseReference | null = null;
   let inputError = "";
 
   try {
-    selected = parseCase(settings.caseNumber);
+    selected = parseCase(settings.caseNumber, settings);
   } catch (error) {
     if (settings.caseNumber) {
       inputError = errorMessage(error);
@@ -40,7 +42,7 @@ export function useCheckForm() {
     baseline: Baseline,
   ): { run: ActiveCheck; parallel: number; timeout: number } | null {
     try {
-      const c = parseCase(settings.caseNumber);
+      const c = parseCase(settings.caseNumber, settings);
       const parallel = Number(settings.parallel);
       const seconds = Number(settings.timeout);
 
@@ -79,5 +81,23 @@ export function useCheckForm() {
     }
   }
 
-  return { settings, selected, inputError, validation, update, prepare };
+  function restore(reference: CaseReference) {
+    setSettings((previous) => ({
+      ...previous,
+      year: reference.year,
+      caseType: reference.caseType,
+      caseNumber: String(reference.number),
+    }));
+    setValidation("");
+  }
+
+  return {
+    settings,
+    selected,
+    inputError,
+    validation,
+    update,
+    prepare,
+    restore,
+  };
 }

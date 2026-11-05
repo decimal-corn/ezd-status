@@ -1,8 +1,23 @@
-import type { CaseInfo, CaseRange, CaseStatus } from "../types/index.ts";
+import {
+  CASE_DEPARTMENT,
+  CASE_TYPES,
+  CASE_YEARS,
+  DEFAULT_CASE_SELECTION,
+} from "../constants/cases.ts";
+import type {
+  CaseInfo,
+  CaseRange,
+  CaseReference,
+  CaseSelection,
+  CaseStatus,
+} from "../types/index.ts";
 
 export const ENDPOINT = "https://app.malopolska.uw.gov.pl/ws/ezd/checkstatus";
 
-export function parseCase(value: string): CaseInfo {
+export function parseCase(
+  value: string,
+  selection: CaseSelection = DEFAULT_CASE_SELECTION,
+): CaseReference {
   if (!/^[0-9]+$/.test(value.trim())) {
     throw new Error(
       "Enter a positive whole case number, without letters, dots or symbols.",
@@ -19,10 +34,42 @@ export function parseCase(value: string): CaseInfo {
     throw new Error("The case number is outside the supported range.");
   }
 
-  return { number, full: caseAt(number) };
+  if (!CASE_YEARS.some((year) => year === selection.year)) {
+    throw new Error("Choose a supported case year.");
+  }
+
+  if (!CASE_TYPES.some((type) => type.code === selection.caseType)) {
+    throw new Error("Choose a supported case type.");
+  }
+
+  const reference = { department: CASE_DEPARTMENT, ...selection };
+
+  return { ...reference, number, full: caseAt(number, reference) };
 }
 
-export const caseAt = (number: number) => `WO-I.6121.${number}.2026`;
+export function caseAt(
+  number: number,
+  reference: Pick<CaseReference, "department" | "caseType" | "year">,
+): string {
+  return `${reference.department}.${reference.caseType}.${number}.${reference.year}`;
+}
+
+export function parseReference(full: string): CaseReference {
+  const match = /^([A-Za-z0-9-]+)\.([0-9]+)\.([0-9]+)\.([0-9]{4})$/.exec(full);
+
+  if (!match) {
+    throw new Error("Invalid saved case reference.");
+  }
+
+  const [, department, caseType, value, year] = match;
+  const number = Number(value);
+
+  if (!Number.isSafeInteger(number) || number < 1) {
+    throw new Error("Invalid saved case number.");
+  }
+
+  return { department, caseType, year, number, full };
+}
 
 export function bounds(c: CaseInfo, shift = 0): CaseRange {
   const start = Math.max(1, c.number - 49 + shift);

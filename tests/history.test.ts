@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { bounds, parseCase } from "../src/lib/cases.ts";
-import { appendRun, emptyLog } from "../src/lib/history.ts";
+import { appendRun, emptyLog, recordToCheck } from "../src/lib/history.ts";
 import { checkCases } from "../src/lib/service.ts";
 import { loadLog, LOG_KEY } from "../src/lib/storage.ts";
 import type { HistoryLog } from "../src/types/index.ts";
@@ -69,7 +69,7 @@ test("retains last 100 runs and preserves successful statuses when a later check
   assert.equal(log.runs.at(-1)?.stopped, true);
 });
 test("sends main case first, limits concurrency, and stops without scheduling further requests", async () => {
-  const c = parseCase("100");
+  const c = parseCase("100", { year: "2027", caseType: "6122" });
   const run = {
     case: c,
     bounds: bounds(c),
@@ -103,7 +103,11 @@ test("sends main case first, limits concurrency, and stops without scheduling fu
     request,
   );
   assert.equal(requested[0], c.full);
-  assert.equal(requested.length, 3);
+  assert.deepEqual(requested, [
+    "WO-I.6122.100.2027",
+    "WO-I.6122.51.2027",
+    "WO-I.6122.52.2027",
+  ]);
   assert.equal(peak, 3);
   assert.equal(run.results.length, 3);
 });
@@ -189,4 +193,16 @@ test("loads legacy status changes without requiring a duplicated data property",
 
   assert.equal(loaded.log.runs.length, 1);
   assert.equal(loaded.log.runs[0].changes.length, 1);
+});
+
+test("restores the year and case type from saved history references", () => {
+  const saved = record("different-type", []);
+
+  saved.main = "WO-I.6122.150.2027";
+  const restored = recordToCheck(saved);
+
+  assert.equal(restored.case.year, "2027");
+  assert.equal(restored.case.caseType, "6122");
+  assert.equal(restored.case.number, 150);
+  assert.equal(restored.case.full, saved.main);
 });

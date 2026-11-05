@@ -73,7 +73,7 @@ export default function App() {
     const check = recordToCheck(record);
 
     checks.view(check, { stopped: record.stopped, at: record.at });
-    form.update("caseNumber", String(check.case.number));
+    form.restore(check.case);
 
     if (comparison.baselineId === record.id) {
       comparison.select("");

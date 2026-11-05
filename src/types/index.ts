@@ -3,6 +3,22 @@ export interface CaseInfo {
   full: string;
 }
 
+export interface CaseSelection {
+  year: string;
+  caseType: string;
+}
+
+export interface CaseReference extends CaseInfo, CaseSelection {
+  department: string;
+}
+
+export interface CaseTypeDefinition {
+  code: string;
+  label: string;
+  description: string;
+  originalLabel: string;
+}
+
 export interface CaseRange {
   start: number;
   end: number;
@@ -44,7 +60,7 @@ export interface ComparisonInput {
 
 export interface CheckRun {
   id: string;
-  case: CaseInfo;
+  case: CaseReference;
   bounds: CaseRange;
   shift: number;
   results: CaseResult[];
@@ -84,7 +100,7 @@ export interface FinishedCheck {
   at: string;
 }
 
-export interface CheckSettings {
+export interface CheckSettings extends CaseSelection {
   caseNumber: string;
   parallel: string;
   timeout: string;

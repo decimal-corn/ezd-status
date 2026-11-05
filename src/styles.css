@@ -482,3 +482,16 @@ summary {
   margin-top: 14px;
   color: var(--muted);
 }
+
+.case-selectors {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.case-selectors select {
+  min-width: 0;
+  max-width: 100%;
+}

@@ -5,6 +5,7 @@ import type {
   HistoryLog,
   HistoryRecord,
 } from "../types/index.ts";
+import { parseReference } from "./cases.ts";
 import { changesFor } from "./comparison.ts";
 
 export const emptyLog = (): HistoryLog => ({ version: 1, last: {}, runs: [] });
@@ -76,7 +77,7 @@ export function deleteRun(log: HistoryLog, id: string): HistoryLog {
 export function recordToCheck(record: HistoryRecord): CheckRun {
   return {
     id: record.id,
-    case: { full: record.main, number: Number(record.main.split(".")[2]) },
+    case: parseReference(record.main),
     bounds: { start: record.start, end: record.end },
     shift: 0,
     results: record.results,
