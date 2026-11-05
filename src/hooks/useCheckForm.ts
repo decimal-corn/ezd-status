@@ -14,7 +14,7 @@ export function useCheckForm() {
   const [settings, setSettings] = useState<CheckSettings>({
     ...DEFAULT_CASE_SELECTION,
     caseNumber: "",
-    parallel: "3",
+    parallel: "10",
     timeout: "20",
     randomize: false,
   });

@@ -1,3 +1,5 @@
+import type { Ref } from "react";
+
 import { codes, formatDate, labelStatus, urlFor } from "../lib/cases.ts";
 import type {
   CaseError,
@@ -7,19 +9,20 @@ import type {
 } from "../types/index.ts";
 
 interface Props {
+  ref?: Ref<HTMLElement>;
   selected: CaseInfo | null;
   run: CheckRun | null;
   running: boolean;
 }
 
-export default function MainCase({ selected, run, running }: Props) {
+export default function MainCase({ ref, selected, run, running }: Props) {
   const full = run?.case.full ?? selected?.full;
   const item = run?.results.find((x) => x.full === full);
   const error = run?.errors.find((x) => x.full === full);
   const { status, meta } = describeStatus(item, error, running, run !== null);
 
   return (
-    <section className="panel hero" aria-label="Main case status">
+    <section ref={ref} className="panel hero" aria-label="Main case status">
       <div className="hero-top">
         <div>
           <div className="eyebrow">Main case</div>

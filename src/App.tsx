@@ -1,4 +1,4 @@
-import type { SubmitEvent } from "react";
+import { type SubmitEvent, useRef } from "react";
 
 import CheckSettings from "./components/CheckSettings.tsx";
 import History from "./components/History.tsx";
@@ -13,6 +13,7 @@ import { appendRun, comparisonBaseline, recordToCheck } from "./lib/history.ts";
 import type { HistoryRecord } from "./types/index.ts";
 
 export default function App() {
+  const mainCaseRef = useRef<HTMLElement>(null);
   const form = useCheckForm();
   const checks = useCheckRunner();
   const history = useHistory();
@@ -42,6 +43,20 @@ export default function App() {
     }
 
     history.discardUndo();
+
+    if (window.scrollY === 0) {
+      // Wait for the running state to render before aligning the card.
+      requestAnimationFrame(() => {
+        // Respect a manual scroll that happened before the next frame.
+        if (window.scrollY === 0) {
+          mainCaseRef.current?.scrollIntoView({
+            block: "start",
+            behavior: "smooth",
+          });
+        }
+      });
+    }
+
     void checks.start(
       prepared.run,
       prepared.parallel,
@@ -129,6 +144,7 @@ export default function App() {
           onChange={form.update}
         />
         <MainCase
+          ref={mainCaseRef}
           selected={form.selected}
           run={mainRun}
           running={checks.running}
